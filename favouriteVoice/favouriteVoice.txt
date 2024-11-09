@@ -1,0 +1,6 @@
+response_en-US-Casual-K_hhello, say 2 sentences and only use 15 words_20241013_210020
+response_en-US-Wavenet-D_hhello, say 2 sentences and only use 15 words_20241013_210618
+
+
+
+response_en-US-Wavenet-F_hhello, say 2 sentences and only use 15 words_20241013_210645

@@ -1,0 +1,50 @@
+{
+    "articles": {
+        "text": "Articles are words that define a noun as specific or unspecific. The definite article is 'the,' and the indefinite articles are 'a' and 'an.'",
+        "images": [
+            "./knowledge_base/articles/articles1.png"
+        ]
+    },
+    "tenses": {
+        "text": "Tenses indicate the time of action or state of being. The primary tenses are past, present, and future.",
+        "images": [
+            "./knowledge_base/tenses/tenses1.png"
+        ]
+    },
+    "pronouns": {
+        "text": "Pronouns replace nouns in a sentence to avoid repetition. Examples include 'he,' 'she,' 'it,' 'they,' 'we,' and 'you.'",
+        "images": [
+            "./knowledge_base/pronouns/pronouns1.png"
+        ]
+    },
+    "adjectives": {
+        "text": "Adjectives describe or modify nouns and pronouns, providing more information. For example: 'a red apple,' 'an interesting book.'",
+        "images": [
+            "./knowledge_base/adjectives/adjectives1.png"
+        ]
+    },
+    "adverbs": {
+        "text": "Adverbs modify verbs, adjectives, or other adverbs, often ending in '-ly.' Examples: 'quickly,' 'very,' 'extremely.'",
+        "images": [
+            "./knowledge_base/adverbs/adverbs1.png"
+        ]
+    },
+    "prepositions": {
+        "text": "Prepositions show the relationship between a noun (or pronoun) and other words in a sentence. Common prepositions include 'in,' 'on,' 'at,' 'by,' 'for,' 'with.'",
+        "images": [
+            "./knowledge_base/prepositions/prepositions1.png"
+        ]
+    },
+    "conjunctions": {
+        "text": "Conjunctions connect words, phrases, or clauses. Coordinating conjunctions include 'and,' 'but,' 'or,' 'so,' 'yet.'",
+        "images": [
+            "./knowledge_base/conjunctions/conjunctions1.png"
+        ]
+    },
+    "modal_verbs": {
+        "text": "Modal verbs express necessity or possibility. Common modals include 'can,' 'could,' 'may,' 'might,' 'must,' 'should,' 'will,' 'would.'",
+        "images": [
+            "./knowledge_base/modal_verbs/modal_verbs1.png"
+        ]
+    }
+}

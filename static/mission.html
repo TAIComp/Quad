@@ -1,0 +1,78 @@
+<!-- File: static/mission.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Mission</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Canvas Element for Background Particle Animations -->
+    <canvas id="nodeCanvas"></canvas>
+
+    <!-- Blob Container for Decorative Blobs -->
+    <div class="blob-container">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <img src="QUAD.png" alt="QUAD Logo" class="logo-icon" />
+                <span>Quad</span>
+            </a>
+
+            <div class="nav-elements">
+                <ul class="nav-links">
+                    <li><a href="index.html#hero" class="nav-link active internal-link">
+                        <span class="nav-indicator"></span>
+                        Home
+                    </a></li>
+                    <li><a href="index.html#how-it-works" class="nav-link internal-link">
+                        <span class="nav-indicator"></span>
+                        How It Works
+                    </a></li>
+                    <li><a href="index.html#courses" class="nav-link internal-link">
+                        <span class="nav-indicator"></span>
+                        Courses
+                    </a></li>
+                    <li><a href="index.html#pricing" class="nav-link internal-link">
+                        <span class="nav-indicator"></span>
+                        Pricing
+                    </a></li>
+                </ul>
+
+                <div class="nav-buttons">
+                    <button class="btn-secondary">Sign Up</button>
+                    <a href="login.html" class="btn-primary internal-link">Login</a>
+                </div>
+            </div>
+
+            <button class="mobile-menu-btn">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Video Container -->
+    <div class="video-container">
+        <video autoplay muted playsinline>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="click-message">Click anywhere for sound</div>
+    </div>
+
+    <!-- Expert Button -->
+    <button class="expert-button">Talk to an AI Expert</button>
+
+    <!-- JavaScript File -->
+    <script src="scripts.js" defer></script>
+</body>
+</html>

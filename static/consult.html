@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talk to an AI Expert</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Talk to an AI Expert</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Connect with Our AI Experts</h2>
+            <p>Our AI experts are here to help you with any questions or guidance you need on your learning journey.</p>
+            <!-- Add more content as needed -->
+            
+            <!-- Add the WebGL canvas here -->
+            <canvas id="webglCanvas" width="640" height="480" style="border:1px solid #000;"></canvas>
+        </section>
+    </main>
+    <footer>
+        <p>© 2024 Quad Platform. All rights reserved.</p>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('webglCanvas');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas });
+
+            renderer.setSize(canvas.width, canvas.height);
+
+            // Add a light source
+            const ambientLight = new THREE.AmbientLight(0x404040, 2); // Increase intensity
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1).normalize();
+            scene.add(directionalLight);
+
+            // Load the GLTF model
+            const loader = new THREE.GLTFLoader();
+            loader.load('path/to/your/model.glb', function(gltf) {
+                scene.add(gltf.scene);
+                console.log('Model loaded successfully');
+            }, undefined, function(error) {
+                console.error('An error happened', error);
+            });
+
+            camera.position.z = 5;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        });
+    </script>
+</body>
+</html> 
