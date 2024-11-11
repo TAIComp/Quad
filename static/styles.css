@@ -1030,6 +1030,25 @@ body {
     color: rgb(99, 213, 180);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* =========================
    Consult Room Styles
 ========================= */
@@ -1048,6 +1067,7 @@ body {
     position: relative;
 }
 
+/* Heading */
 .consult-container h1 {
     color: var(--secondary-color);
     margin-bottom: 2rem;
@@ -1055,13 +1075,19 @@ body {
     font-weight: 600;
 }
 
+/* Conversation Display */
 #conversation {
     max-height: 400px;
     overflow-y: auto;
     margin-bottom: 1rem;
     text-align: left;
+    padding: 1rem;
+    background: rgba(43, 72, 111, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(43, 72, 111, 0.1);
 }
 
+/* Messages */
 .message {
     padding: 0.75rem 1rem;
     margin-bottom: 0.5rem;
@@ -1080,29 +1106,98 @@ body {
     align-self: flex-start;
 }
 
+/* Status Display */
 #status {
     margin-bottom: 1rem;
     color: var(--secondary-color);
     font-size: 1rem;
 }
 
+/* Start and End Buttons */
+#start-button,
 #end-button {
     padding: 0.75rem 1.5rem;
-    background-color: var(--primary-color);
     border: none;
     border-radius: 5px;
-    color: var(--secondary-color);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    margin: 0.5rem;
 }
 
-#end-button:hover {
+#start-button {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+#start-button:hover {
     background-color: rgb(99, 213, 180);
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(110, 237, 200, 0.4);
 }
+
+#end-button {
+    background-color: var(--secondary-color);
+    color: var(--white);
+}
+
+#end-button:hover {
+    background-color: rgb(43, 72, 111);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(43, 72, 111, 0.4);
+}
+
+#end-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .consult-container {
+        margin: 50px 2rem;
+        padding: 1.5rem;
+    }
+
+    .consult-container h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .consult-container {
+        margin: 50px 1rem;
+        padding: 1rem;
+    }
+
+    .consult-container h1 {
+        font-size: 1.8rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* =========================
    Mission Video Page Styles

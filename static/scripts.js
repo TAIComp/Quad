@@ -502,3 +502,266 @@ function initMissionVideo() {
         });
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// =========================
+// scripts.js
+// =========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize Consult Room functionality
+    initConsultRoom();
+});
+
+/* =========================
+   Consult Room Functionality
+========================= */
+function initConsultRoom() {
+    // Ensure this script runs only on consult.html
+    if (!window.location.pathname.endsWith('consult.html')) return;
+
+    // DOM Elements
+    const conversationDiv = document.getElementById('conversation');
+    const statusDiv = document.getElementById('status');
+    const startButton = document.getElementById('start-button');
+    const endButton = document.getElementById('end-button');
+
+    // State Variables
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+    let isPlaying = false;
+    let silenceTimer;
+    const SILENCE_DURATION = 1000; // 1 second
+
+    // Function to append messages to the conversation div
+    function appendMessage(message, sender) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', sender);
+        messageDiv.textContent = message;
+        conversationDiv.appendChild(messageDiv);
+        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+    }
+
+    // Function to update status
+    function updateStatus(message) {
+        if (statusDiv) {
+            statusDiv.textContent = message;
+        }
+    }
+
+    // Function to initialize microphone access and set up MediaRecorder
+    async function initializeRecorder() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
+
+            mediaRecorder.ondataavailable = event => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstart = () => {
+                isRecording = true;
+                updateStatus('Listening...');
+                // Reset silence timer
+                resetSilenceTimer();
+            };
+
+            mediaRecorder.onstop = () => {
+                isRecording = false;
+                updateStatus('Processing...');
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                audioChunks = [];
+                sendAudio(audioBlob);
+            };
+
+            mediaRecorder.onerror = event => {
+                console.error('MediaRecorder error:', event.error);
+                updateStatus('Error occurred during recording.');
+            };
+
+            // Setup silence detection
+            setupSilenceDetection(stream);
+
+        } catch (error) {
+            console.error('Error accessing microphone:', error);
+            updateStatus('Microphone access denied or unavailable.');
+            startButton.disabled = false;
+        }
+    }
+
+    // Function to start recording
+    function startRecording() {
+        if (mediaRecorder && mediaRecorder.state !== 'recording') {
+            mediaRecorder.start();
+            isRecording = true;
+        }
+    }
+
+    // Function to stop recording
+    function stopRecording() {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            isRecording = false;
+        }
+    }
+
+    // Function to reset silence timer
+    function resetSilenceTimer() {
+        if (silenceTimer) clearTimeout(silenceTimer);
+        silenceTimer = setTimeout(() => {
+            if (isRecording) {
+                stopRecording();
+            }
+        }, SILENCE_DURATION);
+    }
+
+    // Function to detect silence using Web Audio API
+    function setupSilenceDetection(stream) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+        source.connect(analyser);
+        const dataArray = new Uint8Array(analyser.fftSize);
+
+        function detectSilence() {
+            analyser.getByteTimeDomainData(dataArray);
+            let sum = 0;
+            for (let i = 0; i < dataArray.length; i++) {
+                const sample = dataArray[i] / 128 - 1;
+                sum += sample * sample;
+            }
+            const rms = Math.sqrt(sum / dataArray.length);
+            const silenceThreshold = 0.01; // Adjust this threshold as needed
+
+            if (rms < silenceThreshold) {
+                resetSilenceTimer();
+            } else {
+                if (silenceTimer) clearTimeout(silenceTimer);
+                silenceTimer = setTimeout(() => {
+                    if (isRecording) {
+                        stopRecording();
+                    }
+                }, SILENCE_DURATION);
+            }
+
+            requestAnimationFrame(detectSilence);
+        }
+
+        detectSilence();
+    }
+
+    // Function to send audio to the backend
+    async function sendAudio(blob) {
+        const formData = new FormData();
+        formData.append('audio', blob, 'recording.webm');
+
+        try {
+            const response = await fetch(`/api/get-response`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include' // Include cookies for authentication
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to get response from server.');
+            }
+
+            const data = await response.json();
+            appendMessage(data.userInput, 'user');
+            appendMessage(data.aiResponse, 'ai');
+
+            if (data.audioBase64) {
+                playAudio(data.audioBase64);
+            } else {
+                // If no audio, resume listening after a short delay
+                setTimeout(() => {
+                    if (!isPlaying) { // Prevent overlapping recordings
+                        startRecording();
+                    }
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            updateStatus(`Error: ${error.message}`);
+            // Optionally, you can decide to retry or end the conversation
+            // For continuous loop, you can choose to restart listening
+            setTimeout(() => {
+                if (!isPlaying) { // Prevent overlapping recordings
+                    startRecording();
+                }
+            }, 1000);
+        }
+    }
+
+    // Function to play AI response audio
+    function playAudio(base64Audio) {
+        isPlaying = true;
+        updateStatus('Playing AI response...');
+
+        const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+        audio.play().then(() => {
+            isPlaying = false;
+            updateStatus('Listening...');
+            // Resume listening after playback
+            startRecording();
+        }).catch(err => {
+            console.error('Audio playback error:', err);
+            updateStatus('Error playing audio.');
+            isPlaying = false;
+            // Optionally, resume listening even if playback fails
+            startRecording();
+        });
+    }
+
+    // Event listener to start the conversation
+    startButton.addEventListener('click', async () => {
+        startButton.disabled = true;
+        endButton.disabled = false;
+        updateStatus('Initializing conversation...');
+        await initializeRecorder();
+
+        if (mediaRecorder) {
+            // Start recording
+            startRecording();
+        }
+    });
+
+    // Event listener to end the conversation
+    endButton.addEventListener('click', () => {
+        stopRecording();
+        updateStatus('Conversation ended.');
+        appendMessage('You have ended the conversation.', 'user');
+        startButton.disabled = false;
+        endButton.disabled = true;
+    });
+
+    // Optionally, handle the case when the page is unloaded to stop recording
+    window.addEventListener('beforeunload', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+        }
+    });
+}
