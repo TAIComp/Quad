@@ -524,9 +524,12 @@ function initMissionVideo() {
 
 
 
-// =========================
-// scripts.js
-// =========================
+
+/* =========================
+   Consult Room Functionality
+========================= */
+// File: scripts.js
+// File: scripts.js
 
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize Consult Room functionality
@@ -543,16 +546,12 @@ function initConsultRoom() {
     // DOM Elements
     const conversationDiv = document.getElementById('conversation');
     const statusDiv = document.getElementById('status');
-    const startButton = document.getElementById('start-button');
-    const endButton = document.getElementById('end-button');
 
     // State Variables
     let mediaRecorder;
     let audioChunks = [];
     let isRecording = false;
     let isPlaying = false;
-    let silenceTimer;
-    const SILENCE_DURATION = 1000; // 1 second
 
     // Function to append messages to the conversation div
     function appendMessage(message, sender) {
@@ -580,33 +579,17 @@ function initConsultRoom() {
                 audioChunks.push(event.data);
             };
 
-            mediaRecorder.onstart = () => {
-                isRecording = true;
-                updateStatus('Listening...');
-                // Reset silence timer
-                resetSilenceTimer();
-            };
-
             mediaRecorder.onstop = () => {
-                isRecording = false;
-                updateStatus('Processing...');
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
                 audioChunks = [];
                 sendAudio(audioBlob);
             };
 
-            mediaRecorder.onerror = event => {
-                console.error('MediaRecorder error:', event.error);
-                updateStatus('Error occurred during recording.');
-            };
-
-            // Setup silence detection
-            setupSilenceDetection(stream);
-
+            // Start recording after initializing the recorder
+            startRecording();
         } catch (error) {
             console.error('Error accessing microphone:', error);
             updateStatus('Microphone access denied or unavailable.');
-            startButton.disabled = false;
         }
     }
 
@@ -615,6 +598,7 @@ function initConsultRoom() {
         if (mediaRecorder && mediaRecorder.state !== 'recording') {
             mediaRecorder.start();
             isRecording = true;
+            updateStatus('Listening...');
         }
     }
 
@@ -623,53 +607,8 @@ function initConsultRoom() {
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();
             isRecording = false;
+            updateStatus('Processing...');
         }
-    }
-
-    // Function to reset silence timer
-    function resetSilenceTimer() {
-        if (silenceTimer) clearTimeout(silenceTimer);
-        silenceTimer = setTimeout(() => {
-            if (isRecording) {
-                stopRecording();
-            }
-        }, SILENCE_DURATION);
-    }
-
-    // Function to detect silence using Web Audio API
-    function setupSilenceDetection(stream) {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioContext.createMediaStreamSource(stream);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048;
-        source.connect(analyser);
-        const dataArray = new Uint8Array(analyser.fftSize);
-
-        function detectSilence() {
-            analyser.getByteTimeDomainData(dataArray);
-            let sum = 0;
-            for (let i = 0; i < dataArray.length; i++) {
-                const sample = dataArray[i] / 128 - 1;
-                sum += sample * sample;
-            }
-            const rms = Math.sqrt(sum / dataArray.length);
-            const silenceThreshold = 0.01; // Adjust this threshold as needed
-
-            if (rms < silenceThreshold) {
-                resetSilenceTimer();
-            } else {
-                if (silenceTimer) clearTimeout(silenceTimer);
-                silenceTimer = setTimeout(() => {
-                    if (isRecording) {
-                        stopRecording();
-                    }
-                }, SILENCE_DURATION);
-            }
-
-            requestAnimationFrame(detectSilence);
-        }
-
-        detectSilence();
     }
 
     // Function to send audio to the backend
@@ -694,71 +633,50 @@ function initConsultRoom() {
             appendMessage(data.aiResponse, 'ai');
 
             if (data.audioBase64) {
-                playAudio(data.audioBase64);
+                await playAudio(data.audioBase64);
+            }
+
+            // Check for termination phrases in AI response
+            if (data.aiResponse.toLowerCase().includes('conversation ended as per your request')) {
+                updateStatus('Conversation ended.');
             } else {
-                // If no audio, resume listening after a short delay
-                setTimeout(() => {
-                    if (!isPlaying) { // Prevent overlapping recordings
-                        startRecording();
-                    }
-                }, 1000);
+                // Continue the conversation
+                startRecording();
             }
         } catch (error) {
             console.error('Error:', error);
             updateStatus(`Error: ${error.message}`);
-            // Optionally, you can decide to retry or end the conversation
-            // For continuous loop, you can choose to restart listening
-            setTimeout(() => {
-                if (!isPlaying) { // Prevent overlapping recordings
-                    startRecording();
-                }
-            }, 1000);
+            // Optionally, restart the recording after an error
+            startRecording();
         }
     }
 
     // Function to play AI response audio
     function playAudio(base64Audio) {
-        isPlaying = true;
-        updateStatus('Playing AI response...');
+        return new Promise((resolve, reject) => {
+            isPlaying = true;
+            updateStatus('Playing AI response...');
 
-        const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
-        audio.play().then(() => {
-            isPlaying = false;
-            updateStatus('Listening...');
-            // Resume listening after playback
-            startRecording();
-        }).catch(err => {
-            console.error('Audio playback error:', err);
-            updateStatus('Error playing audio.');
-            isPlaying = false;
-            // Optionally, resume listening even if playback fails
-            startRecording();
+            const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
+            audio.play();
+            audio.onended = () => {
+                isPlaying = false;
+                updateStatus('Listening...');
+                resolve();
+            };
+            audio.onerror = err => {
+                console.error('Audio playback error:', err);
+                updateStatus('Error playing audio.');
+                isPlaying = false;
+                reject(err);
+            };
         });
     }
 
-    // Event listener to start the conversation
-    startButton.addEventListener('click', async () => {
-        startButton.disabled = true;
-        endButton.disabled = false;
-        updateStatus('Initializing conversation...');
-        await initializeRecorder();
+    // Initialize recorder and start conversation on page load
+    initializeRecorder();
 
-        if (mediaRecorder) {
-            // Start recording
-            startRecording();
-        }
-    });
-
-    // Event listener to end the conversation
-    endButton.addEventListener('click', () => {
-        stopRecording();
-        updateStatus('Conversation ended.');
-        appendMessage('You have ended the conversation.', 'user');
-        startButton.disabled = false;
-        endButton.disabled = true;
-    });
-
-    // Optionally, handle the case when the page is unloaded to stop recording
+    // Handle the case when the page is unloaded to stop recording
     window.addEventListener('beforeunload', () => {
         if (mediaRecorder && mediaRecorder.state === 'recording') {
             mediaRecorder.stop();

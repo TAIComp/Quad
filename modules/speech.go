@@ -13,11 +13,11 @@ import (
     "github.com/blevesearch/bleve"
     "github.com/blevesearch/bleve/mapping"
     "github.com/google/generative-ai-go/genai"
-    "google.golang.org/api/option"
     speech "cloud.google.com/go/speech/apiv1"
     texttospeech "cloud.google.com/go/texttospeech/apiv1"
     speechpb "google.golang.org/genproto/googleapis/cloud/speech/v1"
     texttospeechpb "google.golang.org/genproto/googleapis/cloud/texttospeech/v1"
+    "google.golang.org/api/option"
 )
 
 // KnowledgeBase is a map where keys are topic names and values are Topic structs.
@@ -215,7 +215,7 @@ func SearchKnowledgeBase(index bleve.Index, query string, interests []string) ([
                 topicResult.Text = string(field.Value())
             case "images":
                 var images []string
-                if err := json.Unmarshal([]byte(field.Value()), &images); err != nil {
+                if err := json.Unmarshal(field.Value(), &images); err != nil {
                     log.Printf("Failed to unmarshal images for topic %s: %v", hit.ID, err)
                     images = []string{}
                 }
@@ -229,9 +229,9 @@ func SearchKnowledgeBase(index bleve.Index, query string, interests []string) ([
 }
 
 // GetResponseFromAudioFile processes an audio file and returns the AI's response, user input text, and audio data.
-func GetResponseFromAudioFile(ctx context.Context, index bleve.Index, speechClient *speech.Client, history *ConversationHistory, userContext UserContext, audioFile string) (string, string, string, error) {
+func GetResponseFromAudioFile(ctx context.Context, index bleve.Index, history *ConversationHistory, userContext UserContext, audioFile string) (string, string, string, error) {
     // Convert speech to text.
-    inputText, err := speechToText(ctx, speechClient, audioFile)
+    inputText, err := speechToText(ctx, audioFile)
     if err != nil {
         return "", "", "", fmt.Errorf("failed to convert speech to text: %v", err)
     }
@@ -241,10 +241,11 @@ func GetResponseFromAudioFile(ctx context.Context, index bleve.Index, speechClie
     // Normalize input for consistent matching.
     normalizedInput := strings.ToLower(inputText)
 
-    // Check for termination phrase.
-    if strings.Contains(normalizedInput, "finish conversation") {
-        log.Println("Ending conversation. Goodbye!")
-        return "", inputText, "", fmt.Errorf("conversation ended by user")
+    // Check for termination phrases.
+    if strings.Contains(normalizedInput, "stop conversation") || strings.Contains(normalizedInput, "finish conversation") {
+        log.Println("Conversation ended by user request.")
+        history.AddMessage("assistant", "Conversation ended as per your request.")
+        return "Conversation ended as per your request.", inputText, "", nil
     }
 
     // Add user input to history.
@@ -312,7 +313,14 @@ func removePunctuation(text string) string {
 }
 
 // speechToText converts the audio file to text using Google Speech-to-Text API.
-func speechToText(ctx context.Context, client *speech.Client, filename string) (string, error) {
+func speechToText(ctx context.Context, filename string) (string, error) {
+    // Initialize Google Cloud Speech client with credentials
+    client, err := speech.NewClient(ctx, option.WithCredentialsFile(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")))
+    if err != nil {
+        return "", fmt.Errorf("failed to create Speech client: %v", err)
+    }
+    defer client.Close()
+
     data, err := os.ReadFile(filename)
     if err != nil {
         return "", fmt.Errorf("failed to read audio file: %v", err)
@@ -345,8 +353,8 @@ func speechToText(ctx context.Context, client *speech.Client, filename string) (
 
 // GenerateAudio converts text to speech and returns Base64-encoded audio data.
 func GenerateAudio(ctx context.Context, text string) (string, error) {
-    // Initialize Google Cloud Text-to-Speech client.
-    client, err := texttospeech.NewClient(ctx)
+    // Initialize Google Cloud Text-to-Speech client with credentials
+    client, err := texttospeech.NewClient(ctx, option.WithCredentialsFile(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")))
     if err != nil {
         return "", fmt.Errorf("failed to create Text-to-Speech client: %v", err)
     }
@@ -395,14 +403,14 @@ func generateContentWithGemini(ctx context.Context, history *ConversationHistory
 
     // Define the model description as an English teacher for children.
     modelDescription := fmt.Sprintf(`
-    You are Quad, an English teacher whose goal is to help children learn English in a fun and engaging way.
-    Focus on topics related to %v.
-    Use language appropriate for a %s-level English learner.
-    Explain concepts simply, provide examples, and use child-friendly language.
-    Encourage students to practice their skills and give positive feedback.
-    Avoid complex terminology, and ensure the learning experience is enjoyable and interactive.
-    Do not use asterisks or quotation marks in your responses.
-    `, userContext.Interests, userContext.EnglishLevel)
+You are Quad, an English teacher whose goal is to help children learn English in a fun and engaging way.
+Focus on topics related to %v.
+Use language appropriate for a %s-level English learner.
+Explain concepts simply, provide examples, and use child-friendly language.
+Encourage students to practice their skills and give positive feedback.
+Avoid complex terminology, and ensure the learning experience is enjoyable and interactive.
+Do not use asterisks or quotation marks in your responses.
+`, userContext.Interests, userContext.EnglishLevel)
 
     // Construct the prompt with conversation history and user context.
     prompt := history.GetPrompt(modelDescription, userContext)
