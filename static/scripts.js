@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMissionVideo();
     initFadeOutTransitions();
     initParticleAnimations();
+    initVoiceInteraction();
 });
 
 /* =========================
@@ -503,183 +504,115 @@ function initMissionVideo() {
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* =========================
-   Consult Room Functionality
+   Voice Interaction Functionality
 ========================= */
-// File: scripts.js
-// File: scripts.js
+class VoiceInteraction {
+    constructor() {
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.isRecording = false;
+        this.startButton = document.getElementById('startButton');
+        this.finishButton = document.getElementById('finishButton');
+        this.recordingIndicator = document.getElementById('recordingIndicator');
+        this.conversation = document.getElementById('conversation');
+        this.status = document.getElementById('status');
+        this.responseAudio = document.getElementById('responseAudio');
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Consult Room functionality
-    initConsultRoom();
-});
-
-/* =========================
-   Consult Room Functionality
-========================= */
-function initConsultRoom() {
-    // Ensure this script runs only on consult.html
-    if (!window.location.pathname.endsWith('consult.html')) return;
-
-    // DOM Elements
-    const conversationDiv = document.getElementById('conversation');
-    const statusDiv = document.getElementById('status');
-
-    // State Variables
-    let mediaRecorder;
-    let audioChunks = [];
-    let isRecording = false;
-    let isPlaying = false;
-
-    // Function to append messages to the conversation div
-    function appendMessage(message, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('message', sender);
-        messageDiv.textContent = message;
-        conversationDiv.appendChild(messageDiv);
-        conversationDiv.scrollTop = conversationDiv.scrollHeight;
+        this.setupEventListeners();
     }
 
-    // Function to update status
-    function updateStatus(message) {
-        if (statusDiv) {
-            statusDiv.textContent = message;
-        }
+    setupEventListeners() {
+        this.startButton.addEventListener('click', () => this.startRecording());
+        this.finishButton.addEventListener('click', () => this.stopRecording());
     }
 
-    // Function to initialize microphone access and set up MediaRecorder
-    async function initializeRecorder() {
+    async startRecording() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm; codecs=opus' });
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.audioChunks = [];
 
-            mediaRecorder.ondataavailable = event => {
-                audioChunks.push(event.data);
+            this.mediaRecorder.ondataavailable = (event) => {
+                this.audioChunks.push(event.data);
             };
 
-            mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                audioChunks = [];
-                sendAudio(audioBlob);
-            };
+            this.mediaRecorder.onstop = () => this.handleRecordingComplete();
 
-            // Start recording after initializing the recorder
-            startRecording();
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            this.updateUI(true);
+            this.status.textContent = 'Listening...';
         } catch (error) {
             console.error('Error accessing microphone:', error);
-            updateStatus('Microphone access denied or unavailable.');
+            this.status.textContent = 'Error accessing microphone. Please check permissions.';
         }
     }
 
-    // Function to start recording
-    function startRecording() {
-        if (mediaRecorder && mediaRecorder.state !== 'recording') {
-            mediaRecorder.start();
-            isRecording = true;
-            updateStatus('Listening...');
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+            this.isRecording = false;
+            this.updateUI(false);
+            this.status.textContent = 'Processing...';
         }
     }
 
-    // Function to stop recording
-    function stopRecording() {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-            isRecording = false;
-            updateStatus('Processing...');
-        }
-    }
-
-    // Function to send audio to the backend
-    async function sendAudio(blob) {
+    async handleRecordingComplete() {
+        const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
         const formData = new FormData();
-        formData.append('audio', blob, 'recording.webm');
+        formData.append('audio', audioBlob);
 
         try {
-            const response = await fetch(`/api/get-response`, {
+            const response = await fetch('/api/get-response', {
                 method: 'POST',
                 body: formData,
-                credentials: 'include' // Include cookies for authentication
+                credentials: 'include'
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to get response from server.');
+                throw new Error('Network response was not ok');
             }
 
             const data = await response.json();
-            appendMessage(data.userInput, 'user');
-            appendMessage(data.aiResponse, 'ai');
+            this.displayMessage('user', data.userInput);
+            this.displayMessage('ai', data.aiResponse);
 
+            // Play audio response if available
             if (data.audioBase64) {
-                await playAudio(data.audioBase64);
+                this.playAudioResponse(data.audioBase64);
             }
 
-            // Check for termination phrases in AI response
-            if (data.aiResponse.toLowerCase().includes('conversation ended as per your request')) {
-                updateStatus('Conversation ended.');
-            } else {
-                // Continue the conversation
-                startRecording();
-            }
+            this.status.textContent = 'Click Start to speak again';
         } catch (error) {
-            console.error('Error:', error);
-            updateStatus(`Error: ${error.message}`);
-            // Optionally, restart the recording after an error
-            startRecording();
+            console.error('Error processing audio:', error);
+            this.status.textContent = 'Error processing audio. Please try again.';
         }
     }
 
-    // Function to play AI response audio
-    function playAudio(base64Audio) {
-        return new Promise((resolve, reject) => {
-            isPlaying = true;
-            updateStatus('Playing AI response...');
-
-            const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
-            audio.play();
-            audio.onended = () => {
-                isPlaying = false;
-                updateStatus('Listening...');
-                resolve();
-            };
-            audio.onerror = err => {
-                console.error('Audio playback error:', err);
-                updateStatus('Error playing audio.');
-                isPlaying = false;
-                reject(err);
-            };
-        });
+    displayMessage(role, content) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${role}-message`;
+        messageDiv.textContent = content;
+        this.conversation.appendChild(messageDiv);
+        this.conversation.scrollTop = this.conversation.scrollHeight;
     }
 
-    // Initialize recorder and start conversation on page load
-    initializeRecorder();
+    playAudioResponse(base64Audio) {
+        const audioSrc = `data:audio/mp3;base64,${base64Audio}`;
+        this.responseAudio.src = audioSrc;
+        this.responseAudio.style.display = 'block';
+        this.responseAudio.play();
+    }
 
-    // Handle the case when the page is unloaded to stop recording
-    window.addEventListener('beforeunload', () => {
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            mediaRecorder.stop();
-        }
-    });
+    updateUI(isRecording) {
+        this.startButton.disabled = isRecording;
+        this.finishButton.disabled = !isRecording;
+        this.recordingIndicator.classList.toggle('hidden', !isRecording);
+    }
+}
+
+// Initialize voice interaction when on the consult page
+if (document.querySelector('.consult-container')) {
+    new VoiceInteraction();
 }
