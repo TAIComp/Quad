@@ -1073,21 +1073,77 @@ body {
 .recording-indicator {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 1rem 0;
-}
-
-.recording-indicator.hidden {
-    display: none;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
 }
 
 .pulse-ring {
-    width: 1rem;
-    height: 1rem;
-    background: red;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
+    position: relative;
+}
+
+/* Waiting State */
+.recording-indicator.waiting .pulse-ring {
+    background: #666;
+}
+
+/* Listening State */
+.recording-indicator.listening .pulse-ring {
+    background: #4CAF50;
     animation: pulse 1.5s infinite;
+}
+
+/* Processing State */
+.recording-indicator.processing .pulse-ring {
+    background: #2196F3;
+    animation: spin 1s infinite linear;
+}
+
+/* Answering State */
+.recording-indicator.answering .pulse-ring {
+    background: #FF9800;
+    animation: blink 1s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.status-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
 }
 
 .conversation-container {
@@ -1119,21 +1175,6 @@ body {
     text-align: center;
     color: #666;
     margin: 1rem 0;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
-    }
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
-    }
 }
 
 /* =========================
@@ -1215,4 +1256,44 @@ body {
     .login-container h2 {
         font-size: 1.5rem;
     }
+}
+
+.message-container {
+    margin: 1rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.message-timestamp {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.user-message,
+.ai-message {
+    display: flex;
+    align-items: flex-start;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.user-message {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.ai-message {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.message-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.message-content {
+    flex: 1;
+    line-height: 1.4;
 }

@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <title>Consult with AI Expert</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Add favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <!-- Add apple touch icon -->
+    <link rel="apple-touch-icon" href="/static/favicon.ico">
+    <!-- Add manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <!-- Add theme color -->
+    <meta name="theme-color" content="#ffffff">
+    <!-- Add WebRTC VAD and Meyda libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/meyda@5.6.1/dist/web/meyda.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/voice-activity-detection@0.0.5/voice-activity-detection.min.js"></script>
 </head>
 <body>
     <!-- Canvas Element for Background Particle Animations -->
@@ -20,18 +31,14 @@
     <!-- Consult Room Container -->
     <div class="consult-container">
         <h1>Talk to an AI Expert</h1>
-        <div id="status" class="status-message">Click Start to begin speaking</div>
-
-        <!-- Voice Control Buttons -->
-        <div class="voice-controls">
-            <button id="startButton" class="btn-primary">Start</button>
-            <button id="finishButton" class="btn-primary" disabled>Finish</button>
-        </div>
-
-        <!-- Recording Indicator -->
-        <div id="recordingIndicator" class="recording-indicator hidden">
-            <div class="pulse-ring"></div>
-            <span>Recording...</span>
+        
+        <!-- Status and Recording Indicator -->
+        <div class="interaction-status">
+            <div id="status" class="status-message">Initializing...</div>
+            <div id="recordingIndicator" class="recording-indicator">
+                <div class="pulse-ring"></div>
+                <span class="status-text">Listening...</span>
+            </div>
         </div>
 
         <!-- Conversation Display -->
@@ -40,7 +47,7 @@
         </div>
 
         <!-- Audio Player for AI Response -->
-        <audio id="responseAudio" controls style="display: none;"></audio>
+        <audio id="responseAudio" style="display: none;"></audio>
     </div>
 
     <!-- JavaScript Files -->

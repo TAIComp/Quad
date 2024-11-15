@@ -69,6 +69,12 @@ func main() {
     http.Handle("/api/get-response", appContext.AuthMiddleware(http.HandlerFunc(appContext.HandleGetResponse)))
     http.Handle("/api/conversation-history", appContext.AuthMiddleware(http.HandlerFunc(appContext.HandleConversationHistory)))
     http.Handle("/api/me", appContext.AuthMiddleware(http.HandlerFunc(appContext.HandleMe)))
+    http.HandleFunc("/api/text-to-speech", modules.TextToSpeechHandler)
+
+    // Add favicon handler
+    http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, "static/favicon.ico")
+    })
 
     // Serve static files
     fs := http.FileServer(http.Dir("./static"))

@@ -7,8 +7,10 @@ import (
     "encoding/json"
     "fmt"
     "log"
+    "net/http"
     "os"
     "strings"
+    "strconv"
 
     "github.com/blevesearch/bleve"
     "github.com/blevesearch/bleve/mapping"
@@ -445,4 +447,45 @@ func extractResponseFromGemini(resp *genai.GenerateContentResponse) string {
         }
     }
     return ""
+}
+
+// TextToSpeechHandler handles the text-to-speech conversion and returns the audio data.
+func TextToSpeechHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    // Parse the request body
+    var request struct {
+        Text string `json:"text"`
+    }
+    if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+        http.Error(w, "Invalid request body", http.StatusBadRequest)
+        return
+    }
+
+    // Generate audio using the existing GenerateAudio function
+    ctx := context.Background()
+    audioBase64, err := GenerateAudio(ctx, request.Text)
+    if err != nil {
+        http.Error(w, fmt.Sprintf("Failed to generate audio: %v", err), http.StatusInternalServerError)
+        return
+    }
+
+    // Decode base64 to binary
+    audioData, err := base64.StdEncoding.DecodeString(audioBase64)
+    if err != nil {
+        http.Error(w, "Failed to decode audio data", http.StatusInternalServerError)
+        return
+    }
+
+    // Set response headers
+    w.Header().Set("Content-Type", "audio/mp3")
+    w.Header().Set("Content-Length", strconv.Itoa(len(audioData)))
+
+    // Write the audio data to the response
+    if _, err := w.Write(audioData); err != nil {
+        log.Printf("Error writing audio response: %v", err)
+    }
 }
