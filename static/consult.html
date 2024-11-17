@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Consult with AI Expert</title>
+    <title>AI Expert Consultation</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Add favicon -->
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
@@ -18,18 +18,24 @@
     <script src="https://cdn.jsdelivr.net/npm/voice-activity-detection@0.0.5/voice-activity-detection.min.js"></script>
 </head>
 <body>
-    <!-- Canvas Element for Background Particle Animations -->
-    <canvas id="nodeCanvas"></canvas>
-
-    <!-- Blob Container for Decorative Blobs -->
-    <div class="blob-container">
-        <div class="blob blob1"></div>
-        <div class="blob blob2"></div>
-        <div class="blob blob3"></div>
+    <!-- Mission Container (Initially Visible) -->
+    <div id="missionContainer" class="mission-container">
+        <div class="video-wrapper">
+            <video id="missionVideo" class="mission-video" autoplay>
+                <source src="./video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="skip-button-wrapper">
+                <button id="skipButton" class="skip-button">
+                    <span class="skip-text">Skip Introduction</span>
+                    <span class="skip-icon">→</span>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Consult Room Container -->
-    <div class="consult-container">
+    <!-- Consult Container (Initially Hidden) -->
+    <div id="consultContainer" class="consult-container" style="display: none;">
         <h1>Talk to an AI Expert</h1>
         
         <!-- Status and Recording Indicator -->
@@ -48,9 +54,75 @@
 
         <!-- Audio Player for AI Response -->
         <audio id="responseAudio" style="display: none;"></audio>
+
+        <canvas id="nodeCanvas"></canvas>
+        
+        <div class="blob-container">
+            <!-- ... existing blobs ... -->
+        </div>
     </div>
 
     <!-- JavaScript Files -->
     <script src="scripts.js" defer></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const missionContainer = document.getElementById('missionContainer');
+            const consultContainer = document.getElementById('consultContainer');
+            const missionVideo = document.getElementById('missionVideo');
+            const skipButton = document.getElementById('skipButton');
+            const status = document.getElementById('status');
+
+            // Add fade-transition class to containers
+            missionContainer.classList.add('fade-transition', 'visible');
+            consultContainer.classList.add('fade-transition');
+
+            // Initially set status to wait for mission
+            if (status) {
+                status.textContent = 'Please watch the introduction video...';
+            }
+
+            // Function to show consult interface and initialize audio
+            function showConsult() {
+                // Fade out mission container
+                missionContainer.classList.remove('visible');
+                
+                // Wait for fade out animation to complete
+                setTimeout(() => {
+                    // Stop and unload the video
+                    missionVideo.pause();
+                    missionVideo.currentTime = 0;
+                    missionVideo.src = "";
+                    
+                    // Hide mission container
+                    missionContainer.style.display = 'none';
+                    
+                    // Show and fade in consult container
+                    consultContainer.style.display = 'block';
+                    // Force reflow
+                    consultContainer.offsetHeight;
+                    consultContainer.classList.add('visible');
+                    
+                    // Update status to waiting for input
+                    if (status) {
+                        status.textContent = 'Waiting for your question...';
+                    }
+
+                    // Initialize audio context only after user interaction
+                    if (typeof initializeAudio === 'function') {
+                        initializeAudio();
+                    }
+                }, 500); // Match this with the CSS transition duration
+            }
+
+            // Handle video end
+            missionVideo.addEventListener('ended', showConsult);
+
+            // Handle skip button
+            skipButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showConsult();
+            });
+        });
+    </script>
 </body>
 </html>

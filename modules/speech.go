@@ -264,11 +264,12 @@ func GetResponseFromAudioFile(ctx context.Context, index bleve.Index, history *C
 
     var aiResponse string
 
-    if len(topics) > 0 {
-        // Use the text from the first matching topic.
+    // Modify the response selection logic
+    if len(topics) > 0 && isRelevantTopic(topics[0], inputText) {
+        // Use the text from the first matching topic only if it's relevant
         aiResponse = topics[0].Text
     } else {
-        // If no topic is found, generate response with Gemini.
+        // If no relevant topic is found, generate response with Gemini
         geminiResponse, err := generateContentWithGemini(ctx, history, userContext)
         if err != nil {
             return "", inputText, "", fmt.Errorf("failed to generate content with Gemini: %v", err)
@@ -403,17 +404,25 @@ func generateContentWithGemini(ctx context.Context, history *ConversationHistory
         return nil, fmt.Errorf("failed to create Gemini client: %v", err)
     }
 
-    // Define the model description as an English teacher for children.
+    // Define the model description with improved context handling
     modelDescription := fmt.Sprintf(`
-You are Quad, an English teacher whose goal is to help children learn English in a fun and engaging way.
-Focus on topics related to %v.
-Use language appropriate for a %s-level English learner.
-Explain concepts simply, provide examples, and use child-friendly language.
-Encourage students to practice their skills and give positive feedback.
-Avoid complex terminology, and ensure the learning experience is enjoyable and interactive.
-Do not use asterisks or quotation marks in your responses.
-`, userContext.Interests, userContext.EnglishLevel)
-
+    You are Quad, an AI-powered online teacher whose goal is to help people learn in a fun and engaging way.
+    Focus on topics related to %v.
+    Use language appropriate for a %s-level English learner.
+    
+    Important Guidelines:
+    1. Always provide accurate, relevant information about the topic being discussed
+    2. If you're not confident about a topic, acknowledge that and provide general information
+    3. Stay focused on the user's question and provide a direct, relevant response
+    4. Use examples when they help explain concepts
+    5. Keep responses clear and concise
+    6. If the topic is outside your knowledge area, say so and suggest reliable sources
+    
+    Current conversation context:
+    The user is interested in learning about various topics. Provide accurate, relevant information
+    about the specific topic they ask about. Avoid generic responses or changing the subject.
+    `, userContext.Interests, userContext.EnglishLevel)
+    
     // Construct the prompt with conversation history and user context.
     prompt := history.GetPrompt(modelDescription, userContext)
 
@@ -488,4 +497,29 @@ func TextToSpeechHandler(w http.ResponseWriter, r *http.Request) {
     if _, err := w.Write(audioData); err != nil {
         log.Printf("Error writing audio response: %v", err)
     }
+}
+
+// Add new helper function to check topic relevance
+func isRelevantTopic(topic TopicResult, query string) bool {
+    // Convert both to lowercase for case-insensitive comparison
+    topicLower := strings.ToLower(topic.TopicName)
+    queryLower := strings.ToLower(query)
+
+    // Calculate similarity score (simple word overlap for now)
+    queryWords := strings.Fields(queryLower)
+    topicWords := strings.Fields(topicLower)
+
+    matchCount := 0
+    for _, queryWord := range queryWords {
+        for _, topicWord := range topicWords {
+            if queryWord == topicWord {
+                matchCount++
+            }
+        }
+    }
+
+    // Require at least 30% word overlap for relevance
+    threshold := 0.3
+    similarity := float64(matchCount) / float64(len(queryWords))
+    return similarity >= threshold
 }

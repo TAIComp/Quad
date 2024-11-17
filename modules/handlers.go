@@ -9,6 +9,8 @@ import (
     "net/http"
     "os"
     "path/filepath"
+    "strings"
+    "strconv"
     "time"
 )
 
@@ -71,10 +73,10 @@ func (app *AppContext) HandleGetResponse(w http.ResponseWriter, r *http.Request)
     }
     defer file.Close()
 
-    // Ensure the tmp directory exists
-    os.MkdirAll("tmp", os.ModePerm)
+    // Cleanup old audio files before creating new one
+    cleanupOldAudioFiles("tmp", username)
 
-    // Save the audio file to a temporary location
+    // Create new audio file with timestamp
     audioFilePath := fmt.Sprintf("tmp/%s_audio_%d.webm", username, time.Now().Unix())
     out, err := os.Create(audioFilePath)
     if err != nil {
@@ -286,4 +288,47 @@ func (app *AppContext) HandleMe(w http.ResponseWriter, r *http.Request) {
 
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(response)
+}
+
+// Add this new function to handle cleanup
+func cleanupOldAudioFiles(directory, username string) {
+    files, err := filepath.Glob(filepath.Join(directory, fmt.Sprintf("%s_audio_*.webm", username)))
+    if err != nil {
+        log.Printf("Error finding old audio files: %v", err)
+        return
+    }
+
+    // Keep track of the most recent file
+    var mostRecent string
+    var mostRecentTime int64
+
+    // Find the most recent file
+    for _, file := range files {
+        // Extract timestamp from filename
+        parts := strings.Split(file, "_")
+        if len(parts) < 3 {
+            continue
+        }
+        
+        // Remove .webm extension and convert to int64
+        timestamp := strings.TrimSuffix(parts[len(parts)-1], ".webm")
+        t, err := strconv.ParseInt(timestamp, 10, 64)
+        if err != nil {
+            continue
+        }
+
+        if t > mostRecentTime {
+            mostRecentTime = t
+            mostRecent = file
+        }
+    }
+
+    // Delete all files except the most recent
+    for _, file := range files {
+        if file != mostRecent {
+            if err := os.Remove(file); err != nil {
+                log.Printf("Error removing old audio file %s: %v", file, err)
+            }
+        }
+    }
 }
