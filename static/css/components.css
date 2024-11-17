@@ -1,0 +1,295 @@
+/* components.css */
+
+/* =========================
+   Animations
+========================= */
+
+/* Blob Animations */
+@keyframes blob1Animation {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(50px, 50px) scale(1.2); }
+}
+
+@keyframes blob2Animation {
+    0% { transform: translate(0, 0) scale(1.2); }
+    100% { transform: translate(-30px, 40px) scale(1); }
+}
+
+@keyframes blob3Animation {
+    0% { transform: translate(0, 0) scale(1.1); }
+    100% { transform: translate(40px, -30px) scale(0.9); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes attention {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.05) rotate(-1deg); }
+    50% { transform: scale(1.05) rotate(1deg); }
+    75% { transform: scale(1.05) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+/* =========================
+   Canvas and Blob Styles
+========================= */
+/* Canvas Styling */
+#nodeCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background-color: transparent;
+}
+
+/* Blob Styles for Particle Animations */
+.blob-container {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+}
+
+.blob1 {
+    width: 300px;
+    height: 300px;
+    left: -100px;
+    top: 20%;
+    background: rgba(110, 237, 200, 0.6);
+    animation: blob1Animation 20s infinite alternate;
+}
+
+.blob2 {
+    width: 250px;
+    height: 250px;
+    right: -50px;
+    top: 30%;
+    background: rgba(110, 237, 200, 0.6);
+    animation: blob2Animation 15s infinite alternate;
+}
+
+.blob3 {
+    width: 280px;
+    height: 280px;
+    left: 40%;
+    bottom: 10%;
+    background: rgba(110, 237, 200, 0.5);
+    animation: blob3Animation 18s infinite alternate;
+}
+
+/* =========================
+   Fade In and Fade Out Animations
+========================= */
+body {
+    animation: fadeIn 1s ease-out;
+}
+
+.fade-out {
+    animation: fadeOut 1s ease-out forwards;
+}
+
+/* =========================
+   Enhanced Button Styles
+========================= */
+.pulse-button {
+    position: relative;
+    padding: 16px 32px !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.5px;
+    background-color: rgb(110, 237, 200) !important;
+    border: none !important;
+    border-radius: 50px !important;
+    color: var(--secondary-color) !important;
+    overflow: hidden;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(110, 237, 200, 0.2) !important;
+    animation: pulse 2s infinite;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: translateZ(0);
+}
+
+.button-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.button-arrow {
+    transition: transform 0.3s ease;
+}
+
+/* Hover Effects */
+.pulse-button:hover,
+.nav-buttons .btn-primary:hover,
+.hero-buttons .btn-primary:hover {
+    background-color: rgb(110, 237, 200);
+    border-color: rgb(110, 237, 200);
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(110, 237, 200, 0.6),
+                0 0 30px rgba(110, 237, 200, 0.4),
+                0 0 40px rgba(110, 237, 200, 0.2);
+}
+
+.pulse-button:hover .button-arrow {
+    transform: translateX(5px);
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(110, 237, 200, 0.4);
+    }
+    70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 15px rgba(110, 237, 200, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(110, 237, 200, 0);
+    }
+}
+
+/* Optional: Add floating animation */
+.hero-buttons {
+    animation: float 6s ease-in-out infinite;
+}
+
+/* Optional: Add shine effect on hover */
+.pulse-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    transform: rotate(45deg);
+    transition: 0.5s;
+}
+
+.pulse-button:hover::after {
+    left: 100%;
+}
+
+/* Add 3D effect */
+.pulse-button:active {
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 2px 10px rgba(110, 237, 200, 0.3);
+}
+
+/* Add attention-grabbing animation */
+@keyframes attention {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.05) rotate(-1deg); }
+    50% { transform: scale(1.05) rotate(1deg); }
+    75% { transform: scale(1.05) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+.hero-buttons:hover .pulse-button {
+    animation: attention 0.5s ease-in-out;
+}
+
+/* Enhanced focus state */
+.pulse-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(110, 237, 200, 0.5),
+                0 0 20px rgba(110, 237, 200, 0.3);
+}
+
+/* Add subtle gradient overlay */
+.pulse-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.2)
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.pulse-button:hover::before {
+    opacity: 1;
+}

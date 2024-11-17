@@ -1,0 +1,133 @@
+/* pages/login.css */
+
+/* =========================
+   Login Page Styles
+========================= */
+
+/* Login Container */
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(5px);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    z-index: 1;
+    position: relative;
+}
+
+/* Login Heading */
+.login-container h2 {
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+/* Form Group */
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+/* Form Labels */
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--secondary-color);
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Form Inputs */
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+/* Input Focus State */
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 5px rgba(110, 237, 200, 0.5);
+}
+
+/* Error Message */
+.error-message {
+    color: red;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+/* Login Button */
+.login-container .btn-primary {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 5px;
+    color: var(--secondary-color);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Login Button Hover State */
+.login-container .btn-primary:hover {
+    background-color: rgb(99, 213, 180);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(110, 237, 200, 0.4);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .login-container {
+        margin: 50px 1rem;
+        padding: 1.5rem;
+    }
+
+    .login-container h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Password Visibility Toggle */
+.password-input {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+}
+
+/* Sign Up Link */
+.signup-link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.signup-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.signup-link a:hover {
+    color: rgb(99, 213, 180);
+}

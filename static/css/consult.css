@@ -1,0 +1,272 @@
+/* pages/consult.css */
+
+/* =========================
+   Consult Room Styles
+========================= */
+
+/* Consult Container */
+.consult-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Voice Controls */
+.voice-controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+}
+
+.recording-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 10px 0;
+}
+
+.pulse-ring {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: relative;
+}
+
+/* Waiting State */
+.recording-indicator.waiting .pulse-ring {
+    background: #666;
+}
+
+/* Listening State */
+.recording-indicator.listening .pulse-ring {
+    background: #4CAF50;
+    animation: pulse 1.5s infinite;
+}
+
+/* Processing State */
+.recording-indicator.processing .pulse-ring {
+    background: #2196F3;
+    animation: spin 1s infinite linear;
+}
+
+/* Answering State */
+.recording-indicator.answering .pulse-ring {
+    background: #FF9800;
+    animation: blink 1s infinite;
+}
+
+.status-text {
+    font-size: 14px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.conversation-container {
+    margin-top: 2rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.message {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.user-message {
+    background: #e3f2fd;
+    margin-left: 2rem;
+}
+
+.ai-message {
+    background: #f5f5f5;
+    margin-right: 2rem;
+}
+
+.status-message {
+    text-align: center;
+    color: #666;
+    margin: 1rem 0;
+}
+
+.message-container {
+    margin: 1rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.message-timestamp {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 0.5rem;
+}
+
+.user-message,
+.ai-message {
+    display: flex;
+    align-items: flex-start;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-radius: 8px;
+}
+
+.user-message {
+    background: rgba(0, 123, 255, 0.1);
+}
+
+.ai-message {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.message-icon {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+
+.message-content {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.mission-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.video-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background: white;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.mission-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border: 0;
+    outline: 0;
+    background: white;
+    margin: 0;
+    padding: 0;
+    display: block;
+    line-height: 0;
+    font-size: 0;
+}
+
+/* Reset any potential body/html margins */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: white;
+}
+
+/* Remove all default video styling */
+video::-webkit-media-controls,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-panel-container,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-toggle-closed-captions-button,
+video::-webkit-media-controls-volume-slider {
+    display: none !important;
+    opacity: 0 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+}
+
+.skip-button-wrapper {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    z-index: 1001;
+}
+
+.skip-button {
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #333;
+    border-radius: 30px;
+    padding: 12px 24px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.skip-button:hover {
+    background: #333;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.skip-text {
+    font-weight: 500;
+}
+
+.skip-icon {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.skip-button:hover .skip-icon {
+    transform: translateX(4px);
+}
+
+.fade-transition {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-transition.visible {
+    opacity: 1;
+}
+
+.consult-container {
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    background: white;
+}
+
+.consult-container.visible {
+    opacity: 1;
+}

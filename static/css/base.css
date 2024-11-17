@@ -1,0 +1,36 @@
+/* base.css */
+
+/* =========================
+   Import Google Fonts
+========================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* =========================
+   Root Variables
+========================= */
+:root {
+    --primary-color: rgb(110, 237, 200);
+    --secondary-color: rgb(43, 72, 111);
+    --white: #ffffff;
+}
+
+/* =========================
+   General Styles
+========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    background: transparent !important;
+    overflow-x: hidden; /* Prevent horizontal scrollbar */
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
