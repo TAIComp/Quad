@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quad Platform</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="img/icon-192.png">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <!-- Canvas Element for Background Particle Animations -->
@@ -327,17 +329,14 @@
     </main>
 
     <!-- JavaScript Files -->
-    <script src="scripts.js" defer></script>
-
-    <!-- Fade Out Navigation on Button Click -->
-    <script>
-        function fadeOutAndNavigate(event) {
-            event.preventDefault();
-            document.body.classList.add('fade-out');
-            setTimeout(() => {
-                window.location.href = event.target.href;
-            }, 1000);
-        }
-    </script>
+    <script src="js/navigationBar.js" type="module"></script>
+    <script src="js/fadeOutTransitions.js" type="module"></script>
+    <script src="js/particleAnimations.js" type="module"></script>
+    <script src="js/login.js" type="module"></script>
+    <script src="js/consultRoom.js" type="module"></script>
+    <!-- Remove or comment out non-existent scripts -->
+    <!-- <script src="js/missionVideo.js" type="module"></script> -->
+    <script src="js/voiceInteraction.js" type="module"></script>
+    <script src="js/main.js" type="module"></script>
 </body>
 </html>

@@ -76,13 +76,8 @@ func main() {
     http.Handle("/api/me", appContext.AuthMiddleware(http.HandlerFunc(appContext.HandleMe)))
     http.HandleFunc("/api/text-to-speech", modules.TextToSpeechHandler)
 
-    // Add favicon handler
-    http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
-        http.ServeFile(w, r, "static/favicon.ico")
-    })
-
     // Serve static files
-    fs := http.FileServer(http.Dir("./static"))
+    fs := http.FileServer(http.Dir("static"))
     http.Handle("/", fs)
 
     // Start periodic cleanup in a separate goroutine

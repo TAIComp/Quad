@@ -1,15 +1,10 @@
 {
-  "name": "AI Tutor",
-  "short_name": "AI Tutor",
-  "icons": [
-    {
-      "src": "/static/favicon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
-    }
-  ],
+  "name": "Quad Platform",
+  "short_name": "Quad",
+  "description": "AI-driven personalized education platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#ffffff"
+  "theme_color": "#4a90e2",
+  "src": "img/icon-192.png"
 } 
