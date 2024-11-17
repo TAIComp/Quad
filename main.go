@@ -10,6 +10,7 @@ import (
     "path/filepath"
     "strings"
     "time"
+    "strconv"
 
     "github.com/joho/godotenv"
     "tutorai-go/modules"
@@ -119,7 +120,7 @@ func periodicCleanup() {
             }
 
             // Keep only most recent file for each user
-            for username, files := range userFiles {
+            for username := range userFiles {
                 cleanupOldAudioFiles("tmp", username)
             }
 
