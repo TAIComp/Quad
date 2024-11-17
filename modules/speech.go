@@ -356,39 +356,80 @@ func speechToText(ctx context.Context, filename string) (string, error) {
 
 // GenerateAudio converts text to speech and returns Base64-encoded audio data.
 func GenerateAudio(ctx context.Context, text string) (string, error) {
-    // Initialize Google Cloud Text-to-Speech client with credentials
     client, err := texttospeech.NewClient(ctx, option.WithCredentialsFile(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")))
     if err != nil {
         return "", fmt.Errorf("failed to create Text-to-Speech client: %v", err)
     }
     defer client.Close()
 
-    // Prepare the text input for speech synthesis.
-    req := &texttospeechpb.SynthesizeSpeechRequest{
-        Input: &texttospeechpb.SynthesisInput{
-            InputSource: &texttospeechpb.SynthesisInput_Text{
-                Text: text,
+    // Split text into sentences
+    sentences := splitIntoSentences(text)
+    var allAudioContent []byte
+
+    // Process each chunk separately
+    for _, sentence := range sentences {
+        if len(strings.TrimSpace(sentence)) == 0 {
+            continue
+        }
+
+        req := &texttospeechpb.SynthesizeSpeechRequest{
+            Input: &texttospeechpb.SynthesisInput{
+                InputSource: &texttospeechpb.SynthesisInput_Text{
+                    Text: sentence,
+                },
             },
-        },
-        Voice: &texttospeechpb.VoiceSelectionParams{
-            LanguageCode: "en-US",
-            Name:         "en-US-Casual-K", // Set the specific voice name.
-        },
-        AudioConfig: &texttospeechpb.AudioConfig{
-            AudioEncoding: texttospeechpb.AudioEncoding_MP3,
-        },
+            Voice: &texttospeechpb.VoiceSelectionParams{
+                LanguageCode: "en-US",
+                Name:         "en-US-Casual-K",
+            },
+            AudioConfig: &texttospeechpb.AudioConfig{
+                AudioEncoding: texttospeechpb.AudioEncoding_MP3,
+            },
+        }
+
+        resp, err := client.SynthesizeSpeech(ctx, req)
+        if err != nil {
+            return "", fmt.Errorf("failed to synthesize speech: %v", err)
+        }
+
+        allAudioContent = append(allAudioContent, resp.AudioContent...)
     }
 
-    // Perform the text-to-speech request.
-    resp, err := client.SynthesizeSpeech(ctx, req)
-    if err != nil {
-        return "", fmt.Errorf("failed to synthesize speech: %v", err)
-    }
-
-    // Encode the audio content to Base64.
-    audioBase64 := base64.StdEncoding.EncodeToString(resp.AudioContent)
-
+    // Encode the combined audio content to Base64
+    audioBase64 := base64.StdEncoding.EncodeToString(allAudioContent)
     return audioBase64, nil
+}
+
+// Helper function to split text into sentences
+func splitIntoSentences(text string) []string {
+    // Split on common sentence endings
+    splitPoints := []string{". ", "! ", "? ", ".\n", "!\n", "?\n"}
+    sentences := []string{text}
+
+    for _, sp := range splitPoints {
+        var newSentences []string
+        for _, s := range sentences {
+            parts := strings.Split(s, sp)
+            for i, part := range parts {
+                if i < len(parts)-1 {
+                    newSentences = append(newSentences, part+sp)
+                } else {
+                    newSentences = append(newSentences, part)
+                }
+            }
+        }
+        sentences = newSentences
+    }
+
+    // Filter out empty sentences and trim spaces
+    var filtered []string
+    for _, s := range sentences {
+        if trimmed := strings.TrimSpace(s); len(trimmed) > 0 {
+            filtered = append(filtered, trimmed)
+        }
+    }
+
+    return filtered
 }
 
 // generateContentWithGemini generates content using the Gemini API based on the conversation history.
